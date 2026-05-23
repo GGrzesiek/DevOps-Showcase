@@ -1,0 +1,37 @@
+kube-prometheus-stack:
+  prometheus:
+    prometheusSpec:
+      retention: 7d
+      scrapeInterval: 15s
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelector: {}
+      serviceMonitorNamespaceSelector: {}
+      ruleSelector: {}
+      ruleNamespaceSelector: {}
+
+  grafana:
+    enabled: true
+    adminPassword: "changeme-set-via-secret"
+    sidecar:
+      dashboards:
+        enabled: true
+        searchNamespace: ALL
+        label: grafana_dashboard
+        labelValue: "1"
+
+  alertmanager:
+    config:
+      global:
+        resolve_timeout: 5m
+      route:
+        receiver: slack
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 12h
+      receivers:
+        - name: slack
+          slack_configs:
+            - api_url: "YOUR_SLACK_WEBHOOK_URL"
+              channel: "#alerts"
+              title: "{{ .GroupLabels.alertname }}"
+              text: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
