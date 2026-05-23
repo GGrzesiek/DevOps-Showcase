@@ -1,0 +1,57 @@
+name: Terraform Plan
+
+on:
+  pull_request:
+    paths: ["infra/**"]
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/environments/dev
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.8.0"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: YOUR_ROLE_ARN
+          aws-region: eu-west-1
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive ../../
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -no-color 2>&1 | tee plan-output.txt
+
+      - name: Post plan as PR comment
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const raw = fs.readFileSync('infra/environments/dev/plan-output.txt', 'utf8');
+            const body = raw.length > 60000 ? raw.slice(0, 60000) + '\n...(truncated)' : raw;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Terraform Plan\n\`\`\`hcl\n${body}\n\`\`\``
+            });
