@@ -1,1 +1,10 @@
 .superpowers/
+charts/*/charts/
+charts/*/.helmcache/
+__pycache__/
+*.pyc
+.pytest_cache/
+infra/**/.terraform/
+infra/**/*.tfplan
+.venv
+.coverage
