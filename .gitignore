@@ -8,3 +8,6 @@ infra/**/.terraform/
 infra/**/*.tfplan
 .venv
 .coverage
+.tfstate
+.lock.hcl
+.terraform.tfstate.backup
