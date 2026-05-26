@@ -40,7 +40,7 @@ jobs:
       - name: Configure AWS credentials (OIDC — no static keys)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: YOUR_ROLE_ARN   # output from terraform: github_actions_role_arn
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
