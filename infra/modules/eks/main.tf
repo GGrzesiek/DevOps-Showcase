@@ -78,10 +78,12 @@ resource "helm_release" "argocd" {
   namespace        = "argocd"
   create_namespace = true
 
+  # TLS: set up an ACM cert and add these annotations to the service:
+  #   service.beta.kubernetes.io/aws-load-balancer-ssl-cert: <acm-cert-arn>
+  #   service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
   values = [yamlencode({
     server = {
-      service   = { type = "LoadBalancer" }
-      extraArgs = ["--insecure"]
+      service = { type = "LoadBalancer" }
     }
   })]
 

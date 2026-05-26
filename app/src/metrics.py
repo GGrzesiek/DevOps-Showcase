@@ -11,6 +11,7 @@ REQUEST_LATENCY = Histogram(
     "http_request_duration_seconds",
     "HTTP request latency in seconds",
     ["method", "endpoint"],
+    buckets=[0.01, 0.025, 0.05, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 1.0, 2.5, 5.0],
 )
 
 APP_INFO = Gauge(

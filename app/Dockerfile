@@ -12,4 +12,4 @@ COPY --from=builder /install /usr/local
 COPY src/ .
 USER appuser
 EXPOSE 8080
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--access-logfile", "-", "app:create_app()"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--access-logfile", "-", "--timeout", "30", "--max-requests", "1000", "--max-requests-jitter", "100", "app:create_app()"]

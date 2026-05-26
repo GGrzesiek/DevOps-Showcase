@@ -11,7 +11,14 @@ kube-prometheus-stack:
 
   grafana:
     enabled: true
-    adminPassword: "changeme-set-via-secret"
+    # Create the secret before deploying:
+    #   kubectl -n monitoring create secret generic grafana-admin-secret \
+    #     --from-literal=admin-user=admin \
+    #     --from-literal=admin-password=$(openssl rand -base64 24)
+    admin:
+      existingSecret: grafana-admin-secret
+      userKey: admin-user
+      passwordKey: admin-password
     sidecar:
       dashboards:
         enabled: true

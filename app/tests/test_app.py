@@ -41,3 +41,25 @@ def test_metrics_contains_request_latency(client):
 def test_metrics_content_type_is_text(client):
     response = client.get("/metrics")
     assert "text/plain" in response.content_type
+
+
+def test_index_returns_exact_message(client):
+    data = client.get("/").get_json()
+    assert data["message"] == "GitOps Platform — Running"
+
+
+def test_unknown_route_returns_404(client):
+    assert client.get("/does-not-exist").status_code == 404
+
+
+def test_post_to_health_returns_405(client):
+    assert client.post("/health").status_code == 405
+
+
+def test_post_to_index_returns_405(client):
+    assert client.post("/").status_code == 405
+
+
+def test_metrics_contains_app_info(client):
+    response = client.get("/metrics")
+    assert b"app_info" in response.data

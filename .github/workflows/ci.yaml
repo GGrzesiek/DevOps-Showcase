@@ -27,7 +27,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r app/requirements.txt
+        run: pip install -r app/requirements-dev.txt
 
       - name: Lint
         run: flake8 app/src app/tests --max-line-length=100
@@ -54,7 +54,7 @@ jobs:
             app/
 
       - name: Scan image with Trivy (fail on CRITICAL)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: "${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:git-${{ github.sha }}"
           exit-code: "1"
