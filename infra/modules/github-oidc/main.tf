@@ -100,16 +100,22 @@ data "aws_iam_policy_document" "terraform_plan" {
     actions   = ["dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem"]
     resources = [var.lock_table_arn]
   }
-  # Read-only AWS permissions needed for terraform plan
+  # Read-only AWS permissions needed for terraform plan (state refresh)
   statement {
     actions = [
       "ec2:Describe*",
       "eks:Describe*", "eks:List*",
       "iam:Get*", "iam:List*",
-      "ecr:Describe*", "ecr:List*",
+      "ecr:Describe*", "ecr:List*", "ecr:GetLifecyclePolicy",
       "elasticloadbalancing:Describe*",
+      "kms:DescribeKey", "kms:GetKeyPolicy", "kms:GetKeyRotationStatus", "kms:ListAliases", "kms:ListResourceTags",
+      "logs:DescribeLogGroups", "logs:ListTagsLogGroup", "logs:ListTagsForResource",
       "s3:GetBucketVersioning", "s3:GetEncryptionConfiguration",
-      "s3:GetBucketPublicAccessBlock",
+      "s3:GetBucketPublicAccessBlock", "s3:GetBucketLocation", "s3:GetBucketLogging",
+      "s3:GetBucketAcl", "s3:GetBucketCORS", "s3:GetBucketWebsite", "s3:GetBucketTagging",
+      "s3:GetBucketObjectLockConfiguration", "s3:GetLifecycleConfiguration",
+      "s3:GetReplicationConfiguration", "s3:GetAccelerateConfiguration",
+      "s3:GetBucketRequestPayment", "s3:GetBucketNotification",
     ]
     resources = ["*"]
   }
