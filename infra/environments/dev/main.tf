@@ -7,6 +7,8 @@ terraform {
 
 provider "aws" { region = var.aws_region }
 
+data "aws_caller_identity" "current" {}
+
 locals {
   name = "execon-dev"
   tags = { Environment = "dev", Project = "execon-platform" }
@@ -35,7 +37,11 @@ module "github_oidc" {
   github_org  = var.github_org
   github_repo = var.github_repo
   ecr_arns    = [module.ecr.repository_arn]
-  tags        = local.tags
+
+  state_bucket_arns = ["arn:aws:s3:::${var.state_bucket_name}", "arn:aws:s3:::${var.state_bucket_name}/*"]
+  lock_table_arn    = "arn:aws:dynamodb:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/terraform-locks"
+
+  tags = local.tags
 }
 
 module "eks" {
@@ -47,7 +53,8 @@ module "eks" {
 }
 
 output "ecr_repository_url"      { value = module.ecr.repository_url }
-output "github_actions_role_arn" { value = module.github_oidc.role_arn }
+output "github_actions_role_arn"          { value = module.github_oidc.role_arn }
+output "terraform_plan_role_arn"          { value = module.github_oidc.terraform_plan_role_arn }
 output "cluster_name"            { value = module.eks.cluster_name }
 output "argocd_password_cmd" {
   value = "kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"

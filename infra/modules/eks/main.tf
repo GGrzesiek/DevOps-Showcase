@@ -11,7 +11,7 @@ module "eks" {
   version = "~> 20.0"
 
   cluster_name                   = var.cluster_name
-  cluster_version                = "1.29"
+  cluster_version                = "1.32"
   vpc_id                         = var.vpc_id
   subnet_ids                     = var.private_subnet_ids
   cluster_endpoint_public_access = true
@@ -45,6 +45,7 @@ module "aws_lbc_irsa" {
 }
 
 provider "helm" {
+  
   kubernetes {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
@@ -63,9 +64,15 @@ resource "helm_release" "aws_load_balancer_controller" {
   version    = "1.8.1"
   namespace  = "kube-system"
 
-  set { name = "clusterName";                                                value = module.eks.cluster_name }
-  set { name = "serviceAccount.name";                                        value = "aws-load-balancer-controller" }
-  set { name = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"; value = module.aws_lbc_irsa.iam_role_arn }
+  values = [yamlencode({
+    clusterName = module.eks.cluster_name
+    serviceAccount = {
+      name = "aws-load-balancer-controller"
+      annotations = {
+        "eks.amazonaws.com/role-arn" = module.aws_lbc_irsa.iam_role_arn
+      }
+    }
+  })]
 
   depends_on = [module.eks]
 }

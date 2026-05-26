@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths: ["app/**", "charts/flask-app/**"]
 
 permissions:
@@ -10,9 +10,9 @@ permissions:
   contents: write
 
 env:
-  ECR_REGISTRY: YOUR_ECR_REGISTRY         # e.g. 123456789.dkr.ecr.eu-west-1.amazonaws.com
+  ECR_REGISTRY: 945695383505.dkr.ecr.eu-west-1.amazonaws.com
   ECR_REPOSITORY: flask-app
-  AWS_REGION: YOUR_AWS_REGION             # e.g. eu-west-1
+  AWS_REGION: eu-west-1
 
 jobs:
   ci:

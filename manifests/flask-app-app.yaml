@@ -8,13 +8,13 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YOUR_GITHUB_ORG/execon-platform.git
+    repoURL: https://github.com/GGrzesiek/execon-platform.git
     targetRevision: HEAD
     path: charts/flask-app
     helm:
       parameters:
         - name: image.repository
-          value: "YOUR_ECR_URL/flask-app"
+          value: "945695383505.dkr.ecr.eu-west-1.amazonaws.com/flask-app"
   destination:
     server: https://kubernetes.default.svc
     namespace: flask-app

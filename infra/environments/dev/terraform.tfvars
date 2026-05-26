@@ -1,2 +1,3 @@
-github_org  = "YOUR_GITHUB_USERNAME"   # replace with your GitHub username/org
-github_repo = "execon-platform"
+github_org         = "GGrzesiek"
+github_repo        = "execon-platform"
+state_bucket_name  = "execon-tfstate-0852fa70"
