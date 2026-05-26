@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    paths: ["app/**", "charts/flask-app/**"]
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  ECR_REGISTRY: 945695383505.dkr.ecr.eu-west-1.amazonaws.com
+  ECR_REPOSITORY: flask-app
+  AWS_REGION: eu-west-1
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r app/requirements-dev.txt
+
+      - name: Lint
+        run: flake8 app/src app/tests --max-line-length=100
+
+      - name: Test with coverage
+        run: |
+          cd app
+          pytest tests/ -v --cov=src --cov-fail-under=80
+
+      - name: Configure AWS credentials (OIDC — no static keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:git-${{ github.sha }} \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            app/
+
+      - name: Scan image with Trivy (fail on CRITICAL)
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: "${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:git-${{ github.sha }}"
+          exit-code: "1"
+          severity: "CRITICAL"
+          ignore-unfixed: true
+
+      - name: Push to ECR
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:git-${{ github.sha }}
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Update image tag in Helm values
+        run: |
+          sed -i "s|  tag: .*|  tag: \"git-${{ github.sha }}\"|" charts/flask-app/values.yaml
+          git config user.email "ci@github-actions"
+          git config user.name "GitHub Actions"
+          git add charts/flask-app/values.yaml
+          git diff --staged --quiet || git commit -m "ci: update flask-app image to git-${{ github.sha }}"
+          git push

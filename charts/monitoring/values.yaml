@@ -1,0 +1,44 @@
+kube-prometheus-stack:
+  prometheus:
+    prometheusSpec:
+      retention: 7d
+      scrapeInterval: 15s
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelector: {}
+      serviceMonitorNamespaceSelector: {}
+      ruleSelector: {}
+      ruleNamespaceSelector: {}
+
+  grafana:
+    enabled: true
+    # Create the secret before deploying:
+    #   kubectl -n monitoring create secret generic grafana-admin-secret \
+    #     --from-literal=admin-user=admin \
+    #     --from-literal=admin-password=$(openssl rand -base64 24)
+    admin:
+      existingSecret: grafana-admin-secret
+      userKey: admin-user
+      passwordKey: admin-password
+    sidecar:
+      dashboards:
+        enabled: true
+        searchNamespace: ALL
+        label: grafana_dashboard
+        labelValue: "1"
+
+  alertmanager:
+    config:
+      global:
+        resolve_timeout: 5m
+      route:
+        receiver: slack
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 12h
+      receivers:
+        - name: slack
+          slack_configs:
+            - api_url: "YOUR_SLACK_WEBHOOK_URL"
+              channel: "#alerts"
+              title: "{{ .GroupLabels.alertname }}"
+              text: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"

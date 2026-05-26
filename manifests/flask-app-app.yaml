@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: flask-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/GGrzesiek/execon-platform.git
+    targetRevision: HEAD
+    path: charts/flask-app
+    helm:
+      parameters:
+        - name: image.repository
+          value: "945695383505.dkr.ecr.eu-west-1.amazonaws.com/flask-app"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: flask-app
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
