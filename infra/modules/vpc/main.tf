@@ -24,7 +24,7 @@ module "vpc" {
   flow_log_destination_type = "s3"
   flow_log_destination_arn  = aws_s3_bucket.flow_logs.arn
 
-  public_subnet_tags  = { "kubernetes.io/role/elb"          = "1" }
+  public_subnet_tags  = { "kubernetes.io/role/elb" = "1" }
   private_subnet_tags = { "kubernetes.io/role/internal-elb" = "1" }
 
   tags = var.tags

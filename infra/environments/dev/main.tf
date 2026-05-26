@@ -1,6 +1,6 @@
 terraform {
   required_providers {
-    aws  = { source = "hashicorp/aws",  version = "~> 5.0"  }
+    aws  = { source = "hashicorp/aws", version = "~> 5.0" }
     helm = { source = "hashicorp/helm", version = "~> 2.13" }
   }
 }
@@ -52,10 +52,10 @@ module "eks" {
   tags               = local.tags
 }
 
-output "ecr_repository_url"      { value = module.ecr.repository_url }
-output "github_actions_role_arn"          { value = module.github_oidc.role_arn }
-output "terraform_plan_role_arn"          { value = module.github_oidc.terraform_plan_role_arn }
-output "cluster_name"            { value = module.eks.cluster_name }
+output "ecr_repository_url" { value = module.ecr.repository_url }
+output "github_actions_role_arn" { value = module.github_oidc.role_arn }
+output "terraform_plan_role_arn" { value = module.github_oidc.terraform_plan_role_arn }
+output "cluster_name" { value = module.eks.cluster_name }
 output "argocd_password_cmd" {
   value = "kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
 }

@@ -26,7 +26,7 @@ resource "aws_ecr_lifecycle_policy" "this" {
         countType   = "imageCountMoreThan"
         countNumber = var.keep_last_n
       }
-      action       = { type = "expire" }
+      action = { type = "expire" }
     }]
   })
 }
