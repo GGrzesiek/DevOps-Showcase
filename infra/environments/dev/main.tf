@@ -52,6 +52,30 @@ module "eks" {
   tags               = local.tags
 }
 
+# Grant the terraform-plan CI role just enough K8s access to read Helm release
+# state (stored as secrets) in the namespaces where Helm charts are deployed.
+# AmazonEKSAdminPolicy scoped to these namespaces is the narrowest AWS-managed
+# policy that includes secrets; view-only policies exclude secrets by default.
+resource "aws_eks_access_entry" "terraform_plan" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.github_oidc.terraform_plan_role_arn
+  type          = "STANDARD"
+  tags          = local.tags
+}
+
+resource "aws_eks_access_policy_association" "terraform_plan" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.github_oidc.terraform_plan_role_arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+
+  access_scope {
+    type       = "namespace"
+    namespaces = ["kube-system", "argocd"]
+  }
+
+  depends_on = [aws_eks_access_entry.terraform_plan]
+}
+
 output "ecr_repository_url" { value = module.ecr.repository_url }
 output "github_actions_role_arn" { value = module.github_oidc.role_arn }
 output "terraform_plan_role_arn" { value = module.github_oidc.terraform_plan_role_arn }
