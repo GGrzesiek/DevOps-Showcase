@@ -1,4 +1,4 @@
-# execon-platform — GitOps DevOps Showcase
+# GitOps DevOps Showcase
 
 A production-grade platform demonstrating full-lifecycle DevOps: IaC, GitOps, CI/CD, and Observability — all from a single repository. One `git push` deploys the app with zero manual steps.
 
